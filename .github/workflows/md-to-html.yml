@@ -1,0 +1,42 @@
+name: MD to HTML Converter
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+
+permissions:
+  contents: write
+
+jobs:
+  convert_markdown:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Convert README.md to HTML
+        run: node convert.js
+
+      - name: Commit README.html
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.html
+          if git diff --cached --quiet; then
+            echo "No changes found."
+          else
+            git commit -m "Automated: README.html updated"
+            git push
+          fi
